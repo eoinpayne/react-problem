@@ -1,0 +1,83 @@
+Arguments: 
+  /usr/local/Cellar/node/14.7.0/bin/node /usr/local/Cellar/yarn/1.22.4/libexec/bin/yarn.js
+
+PATH: 
+  /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/eoin.payne/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin:/Users/eoin.payne/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin
+
+Yarn version: 
+  1.22.4
+
+Node version: 
+  14.7.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/eoin.payne/code/ReactJS/cgc-landing2/package.json: Unexpected token } in JSON at position 263
+      at JSON.parse (<anonymous>)
+      at /usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:310:30)
+      at /usr/local/Cellar/yarn/1.22.4/libexec/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "cgc-landing2",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+      "@testing-library/jest-dom": "^4.2.4",
+      "@testing-library/user-event": "^7.1.2",
+      "react": "^16.14.0",
+      "react-dom": "^16.14.0",
+      "react-scripts": "3.4.3",
+    },
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject",
+      "storybook": "start-storybook -p 6006 -s public",
+      "build-storybook": "build-storybook -s public"
+    },
+    "eslintConfig": {
+      "extends": "react-app"
+    },
+    "browserslist": {
+      "production": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+      ],
+      "development": [
+        "last 1 chrome version",
+        "last 1 firefox version",
+        "last 1 safari version"
+      ]
+    },
+    "jest": {
+      "transform": {
+        "^.+\\.[t|j]sx?$": "babel-jest"
+      }
+    },
+    "devDependencies": {
+      "@babel/core": "^7.12.3",
+      "@babel/preset-env": "^7.11.0",
+      "@storybook/addon-actions": "^6.0.26",
+      "@storybook/addon-essentials": "^6.0.26",
+      "@storybook/addon-links": "^6.0.26",
+      "@storybook/node-logger": "^6.0.26",
+      "@storybook/preset-create-react-app": "^3.1.4",
+      "@storybook/react": "^6.0.26",
+      "@testing-library/react": "^9.5.0",
+      "babel-loader": "^8.1.0",
+      "react-is": "^16.13.1"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
