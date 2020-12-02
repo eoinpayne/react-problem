@@ -1,0 +1,7 @@
+//!! Acquired Price $   !! Acquired Price €
+
+//!! FMV Fair Market Value  $  /FMV €
+
+//!! Tax Rate    46% | 48.5 | 52%"  drop down... conditionally select from income
+
+//!! Units
