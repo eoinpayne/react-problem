@@ -79,8 +79,8 @@ export default function EsppTable() {
       date: "2020-11-30",
       acquiredPriceUSD: 151.27,
       acquiredPriceEUR: 126.212,
-      fmvUSD: 224.79,
-      fmvEUR: 187.94,
+      fmvUSD: 224.55,
+      fmvEUR: 187.76,
       units: 10,
     },
   ];

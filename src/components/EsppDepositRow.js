@@ -71,7 +71,8 @@ export default function EsppDepositRow(props) {
         let datePlus = ddate.add(28,"days");
         let now = moment();
         let daysLeft = datePlus.diff(now, 'days');
-        setDaysToPay(daysLeft)
+
+        setDaysToPay(daysLeft >= 0 ? daysLeft : "--")
     })
 
     const updateTotalLiab =  useEffect(() => {

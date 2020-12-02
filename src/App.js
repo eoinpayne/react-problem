@@ -2,6 +2,7 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import MyHeader from './components/MyHeader';
+import MyHeaderBare from './components/MyHeaderBare';
 import ESPPTable from './components/ESPPTable';
 import ESPPTable2 from './components/ESPPTable2';
 import {useSelector} from 'react-redux'
@@ -13,8 +14,10 @@ function App() {
   return (
     <React.Fragment>
       {/* <MyHeader /> */}
-      <br></br>
-      <br></br>
+      <MyHeaderBare />
+      {/* <br></br> */}
+      {/* <br></br> */}
+
       <br></br>
       {/* <ESPPTable2 esppData = {esppRowData}/> */}
       <ESPPTable/>
