@@ -1,25 +1,26 @@
 import React from 'react';
-import MyHeader from './MyHeader';
+import ESPPTable2 from './ESPPTable2';
 //for creating stubs for action probs, like onChanged
-//import {action} from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
+// import {action} from '@storybook/addon-actions';
+// import { storiesOf } from '@storybook/react';
 
 export default {
-    component: MyHeader,
-    title: 'MyHeader',
+    component: ESPPTable2,
+    title: 'ESPPTable2',
 };
 
 //^^ needed
 
 // //option 1
-storiesOf('MyHeader', module).add('Default_way1', () => (
-    <MyHeader />
-  ));
+// storiesOf('ESPPTable', module)
+// .add('ESPPTable2_way1', () => (
+//     <ESPPTable2 />
+// ));
 
 
 //fucntions that return react elements
-export const Default_way2 = () => {
-    return <MyHeader/> 
+export const ESPPTable2_ = () => {
+    return <ESPPTable2/> 
 };
 
 // export const text = () => <Button onClick={action('Hellooo!')}>Hello Button</Button>;
