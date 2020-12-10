@@ -55,8 +55,8 @@ export default function EsppTable() {
       date: "2019-05-31",
       acquiredPriceUSD: 142.63,
       acquiredPriceEUR: 127.37,
-      fmvUSD: 167.80,
-      fmvEUR: 149.84,
+      fmvUSD: 204.12,
+      fmvEUR: 182.28,
       units: 10,
     },
     {
