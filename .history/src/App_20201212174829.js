@@ -3,10 +3,9 @@ import logo from './logo.svg';
 import './App.css';
 import MyHeader from './components/MyHeader';
 import MyHeaderBare from './components/MyHeaderBare';
-// import ESPPTable from './components/ESPPTable';
-import ESPPTable2 from './features/espp/ESPPTable2flux';
+import ESPPTable from './components/ESPPTable';
+import ESPPTable2 from './features/espp/ESPPTable2';
 import {useSelector} from 'react-redux'
-import MyJumbo from './components/MyJumbo';
 
 
 function App() {
@@ -18,7 +17,7 @@ function App() {
       <MyHeaderBare />
       {/* <br></br> */}
       {/* <br></br> */}
-      <MyJumbo/>
+
       <br></br>
       {/* <ESPPTable2 esppData = {esppRowData}/> */}
       {/* <ESPPTable/> */}

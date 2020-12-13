@@ -28,7 +28,6 @@ export const esppSlice = createSlice({
       //   state.value += action.payload
     },
     updateEsppRow: (state, action) =>{
-      debugger;
         state.map( row => {
             if(row.id === action.payload.id){
                 row.units       = action.payload.units
