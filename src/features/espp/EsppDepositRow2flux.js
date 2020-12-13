@@ -93,8 +93,7 @@ export default function EsppDepositRow2(props) {
         },[units, taxRate]);
         
     const dispatchAmountGainAndTotalLiab =  useEffect(() => {
-        debugger;
-        dispatch(updateEsppRow({id: props.index, units: units, amountGain: amountGain, totalLiab: totalLiab }))
+        dispatch(updateEsppRow({date: props.row.date, units: units, amountGain: amountGain, totalLiab: totalLiab }))
         setTotalChargeableAmount(calcTotalChargeableAmount(props.row.date,esppRowData, totalLiab))
 
 
@@ -127,7 +126,8 @@ export default function EsppDepositRow2(props) {
     console.log("BOOM BITCHES")
     return (
         <tr>
-            <td>{props.index}</td>
+            <td></td>
+            {/* <td>{props.index}</td> */}
             <td>{moment(props.row.date).format("YYYY-MM-DD")}</td>
             <td>{props.row.acquiredPriceUSD}</td>
             <td>{props.row.acquiredPriceEUR}</td>
@@ -149,7 +149,7 @@ export default function EsppDepositRow2(props) {
             <td>{"x"}</td>
             {/* <td>{props.index % 2 === 0 && "yep"}</td> */}
             {/* <td>{totalChargeableAmount}</td> */}
-            <td>{props.index % 2 === 0 && totalChargeableAmount}</td>
+            <td></td>
             {/* <td>{totalChargeableAmount}</td> */}
         </tr>
 
