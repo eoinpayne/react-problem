@@ -15,11 +15,10 @@ function App() {
   return (
     <React.Fragment>
       {/* <MyHeader /> */}
-      <MyHeaderBare />
+      <MyHeaderBare/>
       {/* <br></br> */}
       {/* <br></br> */}
       <MyJumbo/>
-      <br></br>
       {/* <ESPPTable2 esppData = {esppRowData}/> */}
       {/* <ESPPTable/> */}
       <ESPPTable2 />

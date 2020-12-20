@@ -15,10 +15,10 @@ import { updateEsppRow, selectEspp } from './esppSlice';
 
 
 export default function EsppYearGroup(props) {
+
     const [outerTotalLiab, setOuterTotalLiab] = useState(0);
 //outer
     const calcTotalChargeableAmount = (esppState, props) =>{
-        debugger
         const filteredRows = esppState.filter((currentRow)=> moment(currentRow.date).isSame(moment(props.year),'year'))
         // const dresult = esppRowData.map((result.totalLiab)=> )
 
@@ -36,7 +36,6 @@ export default function EsppYearGroup(props) {
     const updateTotalLiab =  useEffect(() => {
         // setTotalLiab(   (   (props.row.fmvEUR - props.row.acquiredPriceEUR) * (taxRate / 100)) * units  )
 
-        debugger
         setOuterTotalLiab(calcTotalChargeableAmount(esppState, props))
 
         },[esppState]);

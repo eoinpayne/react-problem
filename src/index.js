@@ -13,7 +13,7 @@ import store from "./app/store";
 ReactDOM.render(
   <Provider store = {store}>
   {/* <React.StrictMode> */}
-    <App />
+    <App style={{"padding": "27px"}}/>
   {/* </React.StrictMode>, */}
   </Provider>,
   document.getElementById('root')
