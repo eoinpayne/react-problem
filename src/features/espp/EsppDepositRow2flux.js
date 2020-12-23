@@ -251,8 +251,8 @@ export default function EsppDepositRow2(props) {
         });
 
       const pdfBytes = await pdfDoc.save();
-      download(pdfBytes, "pdf-lib_modification_example.pdf", "application/pdf");
-    }, 1000);
+      download(pdfBytes, `rtso1_${props.row.date}`, "application/pdf");
+    }, 2000);
   }
 
   const totalLiabilityRef = useRef();
