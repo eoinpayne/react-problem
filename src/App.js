@@ -8,6 +8,11 @@ import ESPPTable2 from './features/espp/ESPPTable2flux';
 import {useSelector} from 'react-redux'
 import MyJumbo from './components/MyJumbo';
 
+/* The following line can be included in your src/index.js or App.js file */
+
+import './App.scss';
+
+
 
 function App() {
   // const esppRowData = useSelector((state) => state.esppRowData)

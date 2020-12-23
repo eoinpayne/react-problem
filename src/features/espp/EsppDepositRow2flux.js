@@ -1,209 +1,354 @@
-import React, { useState, useEffect, useRef } from 'react';
-import moment from 'moment'
-import { updateESPPRow } from "../../js/actions/index";
+import React, { useState, useEffect, useRef } from "react";
+import moment from "moment";
 
-import { useSelector, useDispatch } from 'react-redux';
-import { updateEsppRow, selectEspp } from './esppSlice';
+import { useSelector, useDispatch } from "react-redux";
+import { updateEsppRow } from "./esppSlice";
 
-import { degrees, PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import fs from 'fs';
-import fetch from 'node-fetch';
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import fetch from "node-fetch";
+import download from "downloadjs";
+import TextSignature from "text-signature";
 
-// const fs = require('fs')
+import Form from "react-bootstrap/Form";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 
-
-// import styles from './Counter.module.css';
 
 
 export default function EsppDepositRow2(props) {
-debugger
-    const [units, setUnits] = useState(0);
-    const [taxRate, setTaxRate] = useState(52);
-    const [amountGain, setAmountGain] = useState(0);
-    const [totalLiab, setTotalLiab] = useState(0);
-    const [daysToPay, setDaysToPay] = useState("--");
+  var fs = require("fs");
+  const [units, setUnits] = useState(0);
+  const [taxRate, setTaxRate] = useState(52);
+  const [amountGain, setAmountGain] = useState(0);
+  const [totalLiab, setTotalLiab] = useState(0);
+  const [daysToPay, setDaysToPay] = useState("--");
 
+  const [totalChargeableAmount, setTotalChargeableAmount] = useState(0);
+  const [isSwitchOn, setIsSwitchOn] = useState(false);
 
-    const [totalChargeableAmount, setTotalChargeableAmount] = useState(0);
+  const onSwitchAction = () => {
+    setIsSwitchOn(!isSwitchOn);
+  };
 
-    // const count = useSelector(selectCount)
-    const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-    // const groupedRows = useSelector(state => state.espp.value + 2)
-    // const groupedRows = useSelector(
-    //     // console.log(state),
-    //     selectEspp.espp.reduce((acc, currRow) => {
-    //     if (moment(currRow.date).format("YY") === moment(props.date).format("YY")) {
-    //       acc.add(currRow);
-    //     }
-    //   }, [])
-    
-    // );
-    // const groupedRows = useSelector((state) => {
-    //     // console.log(state),
-    //   state.espp.reduce((acc, currRow) => {
-    //     if (moment(currRow.date).format("YY") === moment(props.date).format("YY")) {
-    //     //   acc.add(currRow);
-    //     }
-    //   }, [])
-    // });
+  const calcTotalChargeableAmount = (
+    dateNotToInclude,
+    esppRowData,
+    currentTotalLiab
+  ) => {
+    moment("2010-10-20").isSame("2010-01-01", "year"); // true
 
+    const filteredRows = esppRowData.filter(
+      (currentRow) =>
+        currentRow.date != dateNotToInclude &&
+        moment(currentRow.date).isSame(moment(dateNotToInclude), "year")
+    );
 
-    const calcTotalChargeableAmount = (dateNotToInclude, esppRowData, currentTotalLiab) =>{
-        moment('2010-10-20').isSame('2010-01-01', 'year');  // true
+    const tempamountGain = filteredRows.reduce((acc, currRow) => {
+      return acc + currRow.totalLiab;
+    }, currentTotalLiab);
+    return tempamountGain;
+  };
 
-        const filteredRows = esppRowData.filter((currentRow)=>  currentRow.date != dateNotToInclude && moment(currentRow.date).isSame(moment(dateNotToInclude),'year'))
-        // const dresult = esppRowData.map((result.totalLiab)=> )
+  const updateDaysToPay = useEffect(() => {
+    let ddate = moment(props.row.date);
+    let datePlus = ddate.add(28, "days");
+    let now = moment();
+    let daysLeft = datePlus.diff(now, "days");
+    setDaysToPay(daysLeft < -365 ? "--" : daysLeft);
+  });
 
-        const tempamountGain = filteredRows.reduce( (acc, currRow)=>{
-            // currentRow.date != dateNotToInclude && moment(currentRow.date).format("YY").equals(moment(dateNotToInclude).format("YY"))
-            return acc + currRow.totalLiab
-        },currentTotalLiab)
-        // console.log("props !_!_!_!_")
-        // console.dir(props)
-        return tempamountGain
-    }
+  const esppRowData = useSelector((state) => state.espp);
+  const updateTotalLiab = useEffect(() => {
+    const blepamountgain =
+      (props.row.fmvEUR - props.row.acquiredPriceEUR) * units;
+    setAmountGain(() => blepamountgain);
+    setTotalLiab(blepamountgain * (taxRate / 100));
+  }, [units, taxRate]);
 
-    //store.getState()
+  const dispatchAmountGainAndTotalLiab = useEffect(() => {
+    dispatch(
+      updateEsppRow({
+        date: props.row.date,
+        units: units,
+        amountGain: amountGain,
+        totalLiab: totalLiab,
+      })
+    );
+    setTotalChargeableAmount(
+      calcTotalChargeableAmount(props.row.date, esppRowData, totalLiab)
+    );
+  }, [totalLiab]);
 
-    //when units/tax rate changes 
-            //update total liab
-            //udate amount gain
-            //update store : units, totalLiab, amountGain
-            
-            //when total liab / amount gain changes
-                //either by ID, or,  by current year
-                // get ID & ID-1 entries from store, or, go get rows with matching year from store
-                    //sum totalLiab , sum amountGain
+  const handleUnitsChange = (event) => {
+    setUnits(parseInt(event.target.value) || 0); //no ()=> as not working with previou value, just replacing with new value
+    // setAmountGain(      (props.row.fmvEUR - props.row.acquiredPriceEUR) * units)
+    // setTotalLiab(   (   (props.row.fmvEUR - props.row.acquiredPriceEUR) * (taxRate / 100)) * units  )
+  };
 
+  const handleTaxRateChange = (event) =>
+    setTaxRate(parseInt(event.target.value));
 
-    const updateDaysToPay = useEffect( ()=>{
-        let ddate = moment(props.row.date);
-        let datePlus = ddate.add(28,"days");
-        let now = moment();
-        let daysLeft = datePlus.diff(now, 'days');
-
-        setDaysToPay(daysLeft < -365 ? "--" : daysLeft)
-    })
-
-
-
-    const esppRowData = useSelector((state) => state.espp)
-    
-    const updateTotalLiab =  useEffect(() => {
-        // props.updateOuterState(props.index, totalLiabilityRef.current.outerText)
-        const blepamountgain = (props.row.fmvEUR - props.row.acquiredPriceEUR) * units
-        setAmountGain( ()=> blepamountgain )
-        // setTotalLiab(   (   (props.row.fmvEUR - props.row.acquiredPriceEUR) * (taxRate / 100)) * units  )
-        setTotalLiab(   blepamountgain * (taxRate / 100)  )
-
-
-        // setTotalChargeableAmount(calcTotalChargeableAmount(props.row.date,esppRowData, totalLiab))
-
-        },[units, taxRate]);
-        
-    const dispatchAmountGainAndTotalLiab =  useEffect(() => {
-        dispatch(updateEsppRow({date: props.row.date, units: units, amountGain: amountGain, totalLiab: totalLiab }))
-        setTotalChargeableAmount(calcTotalChargeableAmount(props.row.date,esppRowData, totalLiab))
-
-
-        },[totalLiab]);
-
-
-
-    const handleUnitsChange = (event) => {
-
-        setUnits(parseInt(event.target.value) || 0) //no ()=> as not working with previou value, just replacing with new value
-        // setAmountGain(      (props.row.fmvEUR - props.row.acquiredPriceEUR) * units)
-        // setTotalLiab(   (   (props.row.fmvEUR - props.row.acquiredPriceEUR) * (taxRate / 100)) * units  )
-}
-
-    const handleTaxRateChange = (event) => (
-        setTaxRate(parseInt(event.target.value))
-    )
-
-    const TaxRateSelect = function (props) {
-        return (
-            <select name="taxRate" id="taxRate" value={taxRate} onChange={props.onChange}>
-                {/* <option value="select">select</option> */}
-                <option value="52">52%</option>
-                <option value="48.5">48.5%</option>
-                <option value="46">46%</option>
-            </select>
-        )
-    }
-
-
-
-    // async function modifyPdf(amountGain, totalLiab) {
-    //     debugger
-    //   const url = 'https://www.revenue.ie/en/additional-incomes/documents/form-rtso1.pdf'
-    //   const existingPdfBytes = await fetch(url, {method: 'POST', mode: 'cors'}).then(res => res.arrayBuffer())
-    
-    //   const pdfDoc = await PDFDocument.load(existingPdfBytes)
-    // //   const pdfDoc = await PDFDocument.load(fs.readFile('./form-rtso1.pdf'));
-
-    //   const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
-    
-    //   const pages = pdfDoc.getPages()
-    //   const firstPage = pages[0]
-    //   const { width, height } = firstPage.getSize()
-    //   firstPage.drawText(totalLiab, {
-    //     x: 5,
-    //     y: height / 2 + 300,
-    //     size: 50,
-    //     font: helveticaFont,
-    //     color: rgb(0.95, 0.1, 0.1),
-    //     // rotate: degrees(-45),
-    //   })
-    //   firstPage.drawText(amountGain, {
-    //     x: 500,
-    //     y: height / 2 + 300,
-    //     size: 50,
-    //     font: helveticaFont,
-    //     color: rgb(0.95, 0.1, 0.1),
-    //     // rotate: degrees(-45),
-    //   })
-    
-    //   const pdfBytes = await pdfDoc.save()
-    // }
-
-
-    const totalLiabilityRef = useRef()
+  const TaxRateSelect = function (props) {
     return (
-        <tr>
-            <td style={{"white-space": "nowrap"}}>{moment(props.row.date).format("YYYY-MM-DD")}</td>
-            <td>{props.row.acquiredPriceUSD}</td>
-            <td>{props.row.acquiredPriceEUR}</td>
-            <td>{props.row.fmvUSD}</td>
-            <td>{props.row.fmvEUR}</td>
-            {/* <td ><input value={units} onChange={handleUnitsChange}></input></td> */}
-            <td ><input style = {{"width":"100%"}} value={units} onChange={handleUnitsChange}></input></td>
-            <td><TaxRateSelect onChange={handleTaxRateChange} /></td>
+      <select
+        name="taxRate"
+        id="taxRate"
+        value={taxRate}
+        onChange={props.onChange}
+      >
+        {/* <option value="select">select</option> */}
+        <option value="52">52%</option>
+        <option value="48.5">48.5%</option>
+        <option value="46">46%</option>
+      </select>
+    );
+  };
 
-            {/* total liablilty */}
-            <td id="totalLiability" ref={totalLiabilityRef}>{totalLiab.toFixed(2)}</td>
-            {/* <td id="totalLiability" ref={totalLiabilityRef}>{((props.row.fmvEUR - props.row.acquiredPriceEUR) * (taxRate / 100)) * units}</td> */}
-            {/* total amount of gain  */}
-            {/* <td id="amountGain">{(props.row.fmvEUR - props.row.acquiredPriceEUR) * units}</td> */}
-            <td id="amountGain">{amountGain.toFixed(2)}</td>
-            <td style={{"white-space": "nowrap"}}>{moment(props.row.date).add(30, 'days').format("YYYY-MM-DD")}</td>
-            {/* <td>{ moment().diff(moment(props.row.date),"days")}</td> */}
-            {/* <td>{moment(props.row.date).diff(moment(), "days") >= 0 ? moment(props.row.date).diff(moment(), "days") : "x"}</td> */}
-            <td>{daysToPay}</td>
-            {/* <td>{props.index % 2 === 0 && "yep"}</td> */}
-            {/* <td>{totalChargeableAmount}</td> */}
-            {/* <td></td> */}
-            {/* <td>{totalChargeableAmount}</td> */}
-            {/* <button onClick = {modifyPdf(amountGain, totalLiab)}> Generate </button> */}
-        </tr>
-    )
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    let name = form.elements.formName.value;
+    let address1 = form.elements.formAddress1.value;
+    let address2 = form.elements.formAddress2.value;
+    let address3 = form.elements.formAddress3.value;
+    let ppsn = form.elements.formPPSN.value;
+    let autoSig = isSwitchOn;
+
+    //   let name = event.target.formName
+
+    modifyPdf(name, address1, address2, address3, ppsn, autoSig);
+    setShow(false);
+  };
+
+  async function modifyPdf(name, address1, address2, address3, ppsn, autoSig) {
+    // function sleep(ms) {
+    //     return new Promise(resolve => setTimeout(resolve, ms));
+    //   }
+    const sleep = (milliseconds) => {
+      return new Promise((resolve) => setTimeout(resolve, milliseconds));
+    };
+
+    const url = "/form-rtso1.pdf";
+    //   "https://cors-anywhere.herokuapp.com/https://www.revenue.ie/en/additional-incomes/documents/form-rtso1.pdf";
+
+    const existingPdfBytes = await fetch(url, {
+      method: "GET", // *GET, POST, PUT, DELETE, etc.
+      mode: "cors", // no-cors, *cors, same-origin
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      redirect: "follow", // manual, *follow, error
+      referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    }).then((res) => res.arrayBuffer());
+
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+    const { width, height } = firstPage.getSize();
+
+    var optionsParameter = {
+      width: 300,
+      height: 300,
+      paddingX: 100,
+      paddingY: 100,
+      canvasTargetDom: ".js-canvasTargetDom",
+      font: ["15px", "'Homemade Apple'"],
+      color: "blue",
+      textString: `${name}`,
+      customFont: {
+        name: "'Homemade Apple'",
+        url: "http://fonts.googleapis.com/css?family=Homemade+Apple",
+      },
+    };
+
+    const textSignature = new TextSignature(optionsParameter);
+
+    setTimeout(async function () {
+      //do stuff here
+      const tempimg = textSignature.getImageData();
+
+      console.log("tempimg inside set timeout");
+      console.log(tempimg);
+      const sigImage = await pdfDoc.embedPng(tempimg);
+
+      firstPage.drawText(`${name}`, {
+        x: 33,
+        y: height - 110,
+        size: 13,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      firstPage.drawText(`${address1}`, {
+        x: 300,
+        y: height - 105,
+        size: 13,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      firstPage.drawText(`${address2}`, {
+        x: 300,
+        y: height - 120,
+        size: 13,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+      firstPage.drawText(`${address3}`, {
+        x: 300,
+        y: height - 137,
+        size: 13,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      firstPage.drawText(`${ppsn}`, {
+        x: 152,
+        y: height - 688,
+        size: 15,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      firstPage.drawText(`${props.row.date}`, {
+        x: 152,
+        y: height - 735,
+        size: 15,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+        // rotate: degrees(-45),
+      });
+      firstPage.drawText(`${Math.round(amountGain)}`, {
+        x: 185,
+        y: height - 800,
+        size: 20,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      firstPage.drawText(`${Math.round(totalLiab)}`, {
+        x: 455,
+        y: height - 800,
+        size: 20,
+        font: helveticaFont,
+        color: rgb(0, 0, 0),
+      });
+
+      autoSig &&
+        firstPage.drawImage(sigImage, {
+          x: 295,
+          y: height - 940,
+          size: 20,
+          font: helveticaFont,
+          color: rgb(0, 0, 0),
+        });
+
+      const pdfBytes = await pdfDoc.save();
+      download(pdfBytes, "pdf-lib_modification_example.pdf", "application/pdf");
+    }, 1000);
+  }
+
+  const totalLiabilityRef = useRef();
+  return (
+    <tr>
+      <td style={{ "white-space": "nowrap" }}>
+        {moment(props.row.date).format("YYYY-MM-DD")}
+      </td>
+      <td>{props.row.acquiredPriceUSD}</td>
+      <td>{props.row.acquiredPriceEUR}</td>
+      <td>{props.row.fmvUSD}</td>
+      <td>{props.row.fmvEUR}</td>
+      <td>
+        <input
+          style={{ width: "100%" }}
+          value={units}
+          onChange={handleUnitsChange}
+        ></input>
+      </td>
+      <td>
+        <TaxRateSelect onChange={handleTaxRateChange} />
+      </td>
+
+      <td id="totalLiability" ref={totalLiabilityRef}>
+        {totalLiab.toFixed(2)}
+      </td>
+      <td id="amountGain">{amountGain.toFixed(2)}</td>
+      <td style={{ "white-space": "nowrap" }}>
+        {moment(props.row.date).add(30, "days").format("YYYY-MM-DD")}
+      </td>
+      <td>{daysToPay}</td>
+      <td>
+        <Button
+          style={{ margin: "0px", padding: "0px" }}
+          variant="primary"
+          size="sm"
+          onClick={handleShow}
+        >
+          Generate RTSO1 form
+        </Button>
+      </td>
+
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>RTSO1 Form generator</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p style={{ textAlign: "center" }}>
+            <i>All fields optional, only used to populate RTSO1 form pdf.</i>
+            <br />
+          </p>
+
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="formName">
+              <Form.Label>Name</Form.Label>
+              <Form.Control type="input" placeholder="Enter Name" />
+              <Form.Text className="text-muted"></Form.Text>
+            </Form.Group>
+
+            <Form.Group controlId="formAddress1">
+              <Form.Label>Address Line 1</Form.Label>
+              <Form.Control type="input" placeholder="Enter Address Line 1" />
+            </Form.Group>
+            <Form.Group controlId="formAddress2">
+              <Form.Label>Address Line 2</Form.Label>
+              <Form.Control type="input" placeholder="Enter Address Line 2" />
+            </Form.Group>
+            <Form.Group controlId="formAddress3">
+              <Form.Label>Address Line 3</Form.Label>
+              <Form.Control type="input" placeholder="Enter Address Line 3" />
+            </Form.Group>
+
+            <Form.Group controlId="formPPSN">
+              <Form.Label>PPSN</Form.Label>
+              <Form.Control type="input" placeholder="Enter PPSN" />
+            </Form.Group>
+
+            <Form.Group controlId="formAutoSignature">
+              <Form.Switch
+                onChange={onSwitchAction}
+                label="Automatically generate a Signature"
+                checked={isSwitchOn}
+              />
+            </Form.Group>
+
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClose}>
+                Close
+              </Button>
+              <Button variant="primary" type="submit" onClick={handleClose}>
+                Save Changes
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Modal.Body>
+      </Modal>
+    </tr>
+  );
 }
-
-
-//generic
-    //number of periods per year, once number entered and "same each year?" is yes. 
-        //popup x number of fields, date attributes
-        //starting year - ending year
-    //auto generate number of year rows, with year field populated and date populated
-
