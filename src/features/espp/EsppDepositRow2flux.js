@@ -248,7 +248,7 @@ export default function EsppDepositRow2(props) {
             rotate: degrees(-4),
           });
         }
-        if(length <= 14){
+        else if(length <= 14){
           firstPage.drawText(name, {
             x: 407,
             y: height - 740,
