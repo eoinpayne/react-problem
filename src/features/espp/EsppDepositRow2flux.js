@@ -4,10 +4,12 @@ import moment from "moment";
 import { useSelector, useDispatch } from "react-redux";
 import { updateEsppRow } from "./esppSlice";
 
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { degrees, PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import fontkit from '@pdf-lib/fontkit'
+
 import fetch from "node-fetch";
 import download from "downloadjs";
-import TextSignature from "text-signature";
+// import TextSignature from "text-signature";
 
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
@@ -132,12 +134,14 @@ export default function EsppDepositRow2(props) {
     // function sleep(ms) {
     //     return new Promise(resolve => setTimeout(resolve, ms));
     //   }
-    const sleep = (milliseconds) => {
-      return new Promise((resolve) => setTimeout(resolve, milliseconds));
-    };
+    // const sleep = (milliseconds) => {
+    //   return new Promise((resolve) => setTimeout(resolve, milliseconds));
+    // };
 
     const url = "/form-rtso1.pdf";
     //   "https://cors-anywhere.herokuapp.com/https://www.revenue.ie/en/additional-incomes/documents/form-rtso1.pdf";
+    // const fontUrl = 'https://fonts.gstatic.com/s/homemadeapple/v11/Qw3EZQFXECDrI2q789EKQZJob0x6XHgOiJM6.woff2';
+    const fontUrl = '/homemade-apple-v11-latin-regular.ttf';
 
     const existingPdfBytes = await fetch(url, {
       method: "GET", // *GET, POST, PUT, DELETE, etc.
@@ -148,36 +152,23 @@ export default function EsppDepositRow2(props) {
       referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
     }).then((res) => res.arrayBuffer());
 
+    const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+  
+    
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    
+    pdfDoc.registerFontkit(fontkit)
+
     const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const appleFont = await pdfDoc.embedFont(fontBytes);
+
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
     const { width, height } = firstPage.getSize();
 
-    var optionsParameter = {
-      width: 300,
-      height: 300,
-      paddingX: 100,
-      paddingY: 100,
-      canvasTargetDom: ".js-canvasTargetDom",
-      font: ["15px", "'Homemade Apple'"],
-      color: "blue",
-      textString: `${name}`,
-      customFont: {
-        name: "'Homemade Apple'",
-        url: "https://fonts.googleapis.com/css?family=Homemade+Apple",
-      },
-    };
 
-    const textSignature = new TextSignature(optionsParameter);
 
-    setTimeout(async function () {
-      //do stuff here
-      const tempimg = textSignature.getImageData();
-
-      console.log("tempimg inside set timeout");
-      console.log(tempimg);
-      const sigImage = await pdfDoc.embedPng(tempimg);
+    // setTimeout(async function () {
 
       firstPage.drawText(`${name}`, {
         x: 33,
@@ -241,18 +232,91 @@ export default function EsppDepositRow2(props) {
         color: rgb(0, 0, 0),
       });
 
-      autoSig &&
-        firstPage.drawImage(sigImage, {
-          x: 295,
-          y: height - 940,
-          size: 20,
-          font: helveticaFont,
-          color: rgb(0, 0, 0),
-        });
+//9
+//17
+
+      if (autoSig && name){
+        const length = name.length 
+        console.log(`length is ${length}`) 
+        if(length <= 11){
+          firstPage.drawText(name, {
+            x: 420,
+            y: height - 735,
+            size: 23,
+            font: appleFont,
+            color: rgb(0, 0, 1),
+            rotate: degrees(-4),
+          });
+        }
+        if(length <= 14){
+          firstPage.drawText(name, {
+            x: 407,
+            y: height - 740,
+            size: 22,
+            font: appleFont,
+            color: rgb(0, 0, 1),
+            rotate: degrees(-3),
+          });
+        }
+
+          else if(length <= 20){
+            firstPage.drawText(name, {
+              x: 393,
+              y: height - 737,
+              size: 18.5,
+              font: appleFont,
+              color: rgb(0, 0, 1),
+              rotate: degrees(-2),
+            });
+          }
+          else if(length <= 27){
+            firstPage.drawText(name, {
+              x: 392,
+              y: height - 740,
+              size: 14,
+              font: appleFont,
+              color: rgb(0, 0, 1),
+              rotate: degrees(1),
+            });
+          }
+            else{
+              firstPage.drawText(name, {
+                x: 392,
+                y: height - 740,
+                size: 11,
+                font: appleFont,
+                color: rgb(0, 0, 1),
+                rotate: degrees(1),
+              });
+          }
+        
+
+      }
+
+      // autoSig &&
+      //   firstPage.drawText(name, {
+      //     x: 400,
+      //     y: height - 744,
+      //     size: 16,
+      //     font: appleFont,
+      //     color: rgb(0, 0, 1),
+      //     // color: Blue,
+      //     // rotate: degrees(),
+          
+
+      //   });
+      // autoSig &&
+      //   firstPage.drawImage(sigImage, {
+      //     x: 295,
+      //     y: height - 940,
+      //     size: 20,
+      //     font: helveticaFont,
+      //     color: rgb(0, 0, 0),
+      //   });
 
       const pdfBytes = await pdfDoc.save();
       download(pdfBytes, `rtso1_${props.row.date}`, "application/pdf");
-    }, 2000);
+    // }, 2000);
   }
 
   const totalLiabilityRef = useRef();
@@ -286,7 +350,7 @@ export default function EsppDepositRow2(props) {
       <td>{daysToPay}</td>
       <td>
         <Button
-          style={{ margin: "0px", padding: "0px" }}
+          style={{ margin: "0px", padding: "1px", maxWidth: "94px" }}
           variant="primary"
           size="sm"
           onClick={handleShow}
