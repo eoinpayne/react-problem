@@ -9,7 +9,9 @@ export const esppSlice = createSlice({
     { id: 3, date: "2019-05-31", acquiredPriceUSD: 142.63, acquiredPriceEUR: 127.37,  fmvUSD: 204.12, fmvEUR: 182.28, units: 0, totalLiab: 0, amountGain: 0  },
     { id: 4, date: "2019-11-30", acquiredPriceUSD: 152.25, acquiredPriceEUR: 138.11,  fmvUSD: 179.12, fmvEUR: 162.57, units: 0, totalLiab: 0, amountGain: 0  },
     { id: 5, date: "2020-05-31", acquiredPriceUSD: 146.14, acquiredPriceEUR: 131.45,  fmvUSD: 183.43, fmvEUR: 164.99, units: 0, totalLiab: 0, amountGain: 0  },
-    { id: 6, date: "2020-11-30", acquiredPriceUSD: 151.27, acquiredPriceEUR: 126.21,  fmvUSD: 224.79, fmvEUR: 187.76, units: 0, totalLiab: 0, amountGain: 0  }
+    { id: 6, date: "2020-11-30", acquiredPriceUSD: 151.27, acquiredPriceEUR: 126.21,  fmvUSD: 224.79, fmvEUR: 187.76, units: 0, totalLiab: 0, amountGain: 0  },
+    { id: 6, date: "2021-05-31", acquiredPriceUSD: 0.00,   acquiredPriceEUR: 0.00,    fmvUSD: 0.00,   fmvEUR: 0.00,   units: 0, totalLiab: 0, amountGain: 0  },
+    { id: 6, date: "2021-11-30", acquiredPriceUSD: 0.00,   acquiredPriceEUR: 0.00,    fmvUSD: 0.00,   fmvEUR: 0.00,   units: 0, totalLiab: 0, amountGain: 0  }
     ],
 
     //using "createSlice" used immer, meaning we can acheive immutability with regular syntax. immer uses JS tool called a Proxy to warp data, which we then mutate

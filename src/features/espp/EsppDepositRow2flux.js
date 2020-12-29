@@ -55,7 +55,9 @@ export default function EsppDepositRow2(props) {
 
   const updateDaysToPay = useEffect(() => {
     let ddate = moment(props.row.date);
-    let datePlus = ddate.add(28, "days");
+    let datePlus = ddate.add(30, "days");
+    console.log("datePlus")
+    console.log(datePlus)
     let now = moment();
     let daysLeft = datePlus.diff(now, "days");
     setDaysToPay(daysLeft < -365 ? "--" : daysLeft);
